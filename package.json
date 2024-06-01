@@ -5,6 +5,7 @@
     "compile": "npx hardhat compile",
     "deploy::token": "npx hardhat run ./ignition/modules/CoinBoxToken.ts --network",
     "deploy::assets": "npx hardhat run ./ignition/modules/Assets.ts --network",
+    "deploy::registry": "npx hardhat run ./ignition/modules/Registration.ts --network",
     "test": "npx hardhat test",
     "coverage": "npx hardhat coverage"
   },
