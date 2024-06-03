@@ -1,7 +1,6 @@
 import { ethers } from 'hardhat';
 import { Registration } from '../../typechain-types';
-
-const OWNER = '0xba4196B4e04D73530baE835509aDcE0f54Aca3CD';
+import { OWNER } from '../helpers/constants';
 
 async function main() {
   console.log('Deploying process: Registration system ------>');

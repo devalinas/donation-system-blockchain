@@ -41,7 +41,8 @@ const config : HardhatUserConfig = {
     sepolia: {
       url: 'https://ethereum-sepolia.blockpi.network/v1/rpc/public',
       chainId: 11155111,
-      accounts: [`0x${PRIVATE_KEY}`]
+      accounts: [`0x${PRIVATE_KEY}`],
+      allowUnlimitedContractSize: true
     },
     mainnet: {
       url: 'https://ethereum-sepolia.blockpi.network/v1/rpc/public',

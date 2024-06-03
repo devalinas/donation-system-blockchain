@@ -1,8 +1,7 @@
 import { ethers } from 'hardhat';
 import { CoinBoxToken } from '../../typechain-types';
+import { OWNER, ROUTER } from '../helpers/constants';
 
-const ROUTER = '0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008';
-const OWNER = '0xba4196B4e04D73530baE835509aDcE0f54Aca3CD';
 
 async function main() {
   console.log('Deploying process: CoinBoxToken ------>');
