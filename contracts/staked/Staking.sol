@@ -4,12 +4,13 @@ pragma solidity 0.8.25;
 import "./interfaces/IStaking.sol";
 import "./DistributionManager.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 /// @title Staking contract
 /// @notice The contract to stake WETH tokens, tokenize the position and get rewards (CoinBoxToken), 
 /// inheriting from a distribution manager contract
-contract Staking is IStaking, DistributionManager, ERC20Upgradeable {
+contract Staking is IStaking, DistributionManager, ERC20Upgradeable, OwnableUpgradeable {
   using SafeERC20 for IERC20;
 
   /// @dev The name of the staking contract
@@ -69,6 +70,7 @@ contract Staking is IStaking, DistributionManager, ERC20Upgradeable {
         revert InvalidAmount();
 
     __ERC20_init(NAME, SYMBOL);
+    __Ownable_init(msg.sender);
     __DistributionManager_init(emissionManager, distributionDuration);
 
     STAKED_TOKEN = stakedToken;
@@ -114,16 +116,44 @@ contract Staking is IStaking, DistributionManager, ERC20Upgradeable {
   /// @param amount The amount to claim
   function claimRewards(uint256 amount) external override {
     if(amount == 0) revert InvalidAmount();
+
+    uint256 cooldownStartTimestamp = stakersCooldowns[msg.sender];
+
+    require(
+      block.timestamp > cooldownStartTimestamp + COOLDOWN_SECONDS,
+      'INSUFFICIENT_COOLDOWN'
+    );
+    require(
+      block.timestamp - cooldownStartTimestamp + COOLDOWN_SECONDS <= UNSTAKE_WINDOW,
+      'UNSTAKE_WINDOW_FINISHED'
+    );
     
     uint256 newTotalRewards =
-      _updateCurrentUnclaimedRewards(msg.sender, balanceOf(msg.sender), false);
+      _updateCurrentUnclaimedRewards(msg.sender, balanceOf(msg.sender), true);
     uint256 amountToClaim = (amount > newTotalRewards) ? newTotalRewards : amount;
     
     stakerRewardsToClaim[msg.sender] = newTotalRewards - amountToClaim;
 
     IERC20(REWARD_TOKEN).safeTransferFrom(REWARDS_VAULT, msg.sender, amountToClaim);
 
+    if (stakerRewardsToClaim[msg.sender] == 0) {
+      stakersCooldowns[msg.sender] = 0;
+    }
+
     emit RewardsClaimed(msg.sender, amountToClaim);
+  }
+
+  /// @notice Redeems the staked tokens by an owner
+  /// @param amount The amount to redeem
+  function redeem(uint256 amount) external override onlyOwner {
+    if(amount == 0) revert InvalidAmount();
+
+    uint256 balanceOfStaking = IERC20(STAKED_TOKEN).balanceOf(address(this));
+    uint256 amountToRedeem = (amount > balanceOfStaking) ? balanceOfStaking : amount;
+
+    IERC20(STAKED_TOKEN).safeTransfer(msg.sender, amountToRedeem);
+
+    emit Redeem(msg.sender, amountToRedeem);
   }
 
   /// @notice Returns the total rewards pending to claim by an staker

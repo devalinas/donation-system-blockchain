@@ -19,9 +19,14 @@ interface IStaking {
   /// @param amount The reward's amount for claim
   event RewardsClaimed(address indexed to, uint256 amount);
 
-  /// @notice It is generated when user activates the cooldown period to redeem
+  /// @notice It is generated when an user activates the cooldown period to redeem
   /// @param user The user's address for activate
   event Cooldown(address indexed user);
+
+  /// @notice It is generated when an owner redeems the staked tokens from the SC
+  /// @param recipient The address whose receives the amount
+  /// @param amountToRedeem The amount to redeem the tokens from the SC
+  event Redeem(address indexed recipient, uint256 amountToRedeem);
 
   /// @notice Stakes WETH tokens by the `msg.sender`
   /// @param amount The amount to stake
@@ -31,9 +36,13 @@ interface IStaking {
   /// It can't be called if the user is not in staking
   function cooldown() external;
 
-  /// @dev Claims an `amount` of `REWARD_TOKEN` to the address `to`
+  /// @notice Claims an `amount` of `REWARD_TOKEN` to the address `to`
   /// @param amount Amount to stake
   function claimRewards(uint256 amount) external;
+  
+  /// @notice Redeems the staked tokens by an owner
+  /// @param amount The amount to redeem
+  function redeem(uint256 amount) external;
 
   /// @dev Return the total rewards pending to claim by an staker
   /// @param staker The staker address

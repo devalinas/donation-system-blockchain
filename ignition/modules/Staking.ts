@@ -5,6 +5,7 @@ import { COOLDOWN_SECONDS, CoinBoxToken, DISTRIBUTION_DURATION, OWNER, UNSTAKE_W
 async function main() {
   console.log('Deploying process: Staking system ------>');
   const StakingImpl = await (await ethers.getContractFactory('Staking')).deploy();
+
   const StakingEncodedInitialize = StakingImpl.interface.encodeFunctionData('initialize', [
     WETH, CoinBoxToken, COOLDOWN_SECONDS, UNSTAKE_WINDOW, OWNER, OWNER, DISTRIBUTION_DURATION
   ]);
